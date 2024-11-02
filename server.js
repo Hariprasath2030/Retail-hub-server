@@ -5,65 +5,36 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config(); // Load environment variables
 
+// Import the authRoute or authRouter module
+const authRoute = require('./routes/authRoute'); // Adjust the filename if needed
+const productRoutes = require('./routes/productRoutes'); // Import the product routes
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.json());
+
+// Routes
+app.use('/api/auth', authRoute);
+app.use('/api/products', productRoutes); // Use product routes
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// Import Product model
-const Product = require('./models/Product');
+  
+app.use((err, req, res, next) => {
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || 'Internal Server Error';
 
-// Routes
-app.get('/api/products', async (req, res) => {
-  try {
-    const products = await Product.find();
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-app.post('/api/products', async (req, res) => {
-  const { userId, productName, productQuantity, price } = req.body;
-  const product = new Product({ userId, productName, productQuantity, price });
-  try {
-    const savedProduct = await product.save();
-    res.status(201).json(savedProduct);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// Update product by ID
-app.put('/api/products/:id', async (req, res) => {
-  const { userId, productName, productQuantity, price } = req.body;
-  try {
-    const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
-      { userId, productName, productQuantity, price },
-      { new: true, runValidators: true }
-    );
-    res.json(updatedProduct);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// Delete product by ID
-app.delete('/api/products/:id', async (req, res) => {
-  try {
-    await Product.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Product deleted' });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
+  res.status(err.statusCode).json({
+    status: err.status,
+    message: err.message,
+  });
 });
 
 // Server listening
