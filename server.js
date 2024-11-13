@@ -7,7 +7,8 @@ require('dotenv').config(); // Load environment variables
 
 // Import the authRoute or authRouter module
 const authRoute = require('./routes/authRoute'); // Adjust the filename if needed
-const productRoutes = require('./routes/productRoutes'); // Import the product routes
+const productRoutes = require('./routes/productRoutes'); 
+const customerRoutes = require('./routes/customerRoute') ;// Import the product routes
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -19,7 +20,8 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoute);
-app.use('/api/products', productRoutes); // Use product routes
+app.use('/api/products', productRoutes);
+app.use('/api/customer',customerRoutes) // Use product routes
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
