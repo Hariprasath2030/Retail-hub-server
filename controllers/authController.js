@@ -9,7 +9,7 @@ exports.signup = async (req, res, next) => {
         const existingUser = await User.findOne({ email: req.body.email });
 
         if (existingUser) {
-            return next(new createError('User already exists!', 400));
+            return next(new createError('Admin already exists!', 400));
         }
 
         const hashedPassword = await bcrypt.hash(req.body.password, 12);
@@ -17,7 +17,7 @@ exports.signup = async (req, res, next) => {
             name: req.body.name,
             email: req.body.email,
             password: hashedPassword,
-            role: req.body.role || 'user' // Default to 'user' if role is not provided
+            role: req.body.role || 'admin' // Default to 'user' if role is not provided
         });
 
         const token = jwt.sign({ id: newUser._id }, 'secretkey123', {
@@ -26,7 +26,7 @@ exports.signup = async (req, res, next) => {
 
         res.status(201).json({
             status: 'success',
-            message: 'User created successfully',
+            message: 'Admin created successfully',
             token,
             user: {
                 _id: newUser._id,
@@ -47,7 +47,7 @@ exports.login = async (req, res, next) => {
         const user = await User.findOne({ email });
 
         if (!user) {
-            return next(new createError('User not found!', 404));
+            return next(new createError('Admin not found!', 404));
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
