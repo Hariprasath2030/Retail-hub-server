@@ -7,6 +7,6 @@ const productSchema = new mongoose.Schema({
   quantity: { type: Number, required: true },
 });
 
-const Product = mongoose.model('Product', productSchema);
+const Product = mongoose.model('productbill', productSchema);
 
 module.exports = Product;

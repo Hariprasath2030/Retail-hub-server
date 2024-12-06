@@ -1,8 +1,8 @@
 const express = require('express');
-const { getProductByBarcode, updateProductQuantity } = require('../controllers/productController');
+const { getProductByBarcode, updateProductQuantity } = require('../controllers/BarProductController');
 
 const router = express.Router();
-
+const app = express();
 router.post('/scan', async (req, res) => {
   const { barcode } = req.body;
 
@@ -44,4 +44,32 @@ router.get('/scan', async (req, res) => {
   }
 });
 
+// Routes
+app.get('/api/products/:barcode', async (req, res) => {
+  const { barcode } = req.params;
+
+  try {
+    const product = await Product.findOne({ barcode });
+    if (product) {
+      res.json(product);
+    } else {
+      res.status(404).json({ message: 'Product not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving product', error });
+  }
+});
+
+app.patch('/api/products/decrement/:barcode', async (req, res) => {
+  const { barcode } = req.params;
+  const product = await Product.findOne({ barcode });
+
+  if (product && product.quantity > 0) {
+    product.quantity -= 1;
+    await product.save();
+    res.status(200).json(product);
+  } else {
+    res.status(400).json({ message: 'Product is out of stock or not found.' });
+  }
+});
 module.exports = router;
