@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
   barcode: { type: String, required: true, unique: true },
-  name: { type: String, required: true },
-  price: { type: Number, required: true },
-  quantity: { type: Number, required: true },
+  name: { type: String },
+  price: { type: Number },
+  quantity: { type: Number },
 });
 
-const Product = mongoose.model('productbill', productSchema);
+const productt = mongoose.model('productt', productSchema);
 
-module.exports = Product;
+module.exports = productt;
