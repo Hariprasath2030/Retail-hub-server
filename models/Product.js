@@ -5,7 +5,6 @@ const productSchema = new mongoose.Schema({
   userId: { 
     type: String,
     required: [true, 'Product ID is required'],
-    unique: true
   },
   productName: { 
     type: String, 
