@@ -6,7 +6,6 @@ const productSchema = new mongoose.Schema({
   userId: { 
     type: String,
     required: [true, 'Product ID is required'],
-    unique: true,  // Ensures that the Product ID is unique
   },
   productName: { 
     type: String, 
