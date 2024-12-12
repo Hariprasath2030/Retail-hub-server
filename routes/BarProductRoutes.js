@@ -99,7 +99,7 @@ router.get('/', async (req, res) => {
 });
 
 // PATCH /api/products/decrement/:barcode - Decrement product quantity
-router.patch('/api/products/decrement/:userId', async (req, res) => {
+router.patch('/api/productts/decrement/:userId', async (req, res) => {
   const { userId } = req.params;
   const { quantity } = req.query; // Quantity to decrement passed as query parameter
 
