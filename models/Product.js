@@ -1,4 +1,3 @@
-// models/Product.js
 const mongoose = require('mongoose');
 
 // Define the product schema
@@ -6,21 +5,22 @@ const productSchema = new mongoose.Schema({
   userId: { 
     type: String,
     required: [true, 'Product ID is required'],
+    unique: true
   },
   productName: { 
     type: String, 
     required: [true, 'Product Name is required'], 
-    unique: true, // Ensures that the Product Name is unique
+    unique: true 
   },
   productQuantity: { 
     type: Number, 
     required: [true, 'Product Quantity is required'], 
-    min: [0, 'Quantity must be a positive number'], // Ensures quantity is non-negative
+    min: [0, 'Quantity must be a positive number']
   },
   price: { 
     type: Number, 
     required: [true, 'Price is required'], 
-    min: [0, 'Price must be a positive number'], // Ensures price is non-negative
+    min: [0, 'Price must be a positive number'] 
   },
 });
 

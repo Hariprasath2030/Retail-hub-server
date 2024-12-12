@@ -6,13 +6,13 @@ const router = express.Router();
 
 // POST /scan - Reduce product quantity by 1 after scanning
 router.post('/scan', async (req, res) => {
-    const { userId } = req.body;
+    const { barcode } = req.body;
     try {
-        const product = await getProductByBarcode(userId);
+        const product = await getProductByBarcode(barcode);
         if (!product) {
             return res.status(404).send({ message: 'Product not found' });
         }
-        const updatedProduct = await updateProductQuantity(userId, 1); // Reduce quantity by 1
+        const updatedProduct = await updateProductQuantity(barcode, 1); // Reduce quantity by 1
         res.status(200).json({
           productName: updatedProduct.productName,
           productQuantity: updatedProduct.productQuantity,
@@ -24,10 +24,10 @@ router.post('/scan', async (req, res) => {
     }
 });
 router.post('/', async (req, res) => {
-  const { userId, productName, price, productQuantity } = req.body;
+  const { barcode, productName, price, productQuantity } = req.body;
 
   try {
-    const existingProduct = await Product.findOne({ userId });
+    const existingProduct = await Product.findOne({ barcode });
 
     if (existingProduct) {
       // Update quantity if the product already exists
@@ -38,7 +38,7 @@ router.post('/', async (req, res) => {
     }
 
     // Create a new product if it doesn't exist
-    const newProduct = new Product({ userId, productName, price, productQuantity });
+    const newProduct = new Product({ barcode, productName, price, productQuantity });
     await newProduct.save();
 
     res.status(201).json({ message: 'Product added successfully', product: newProduct });
@@ -50,9 +50,9 @@ router.post('/', async (req, res) => {
 
 // GET /scan - Retrieve product details by barcode
 router.get('/scan', async (req, res) => {
-    const userId = req.query.userId;
+    const barcode = req.query.barcode;
     try {
-        const product = await getProductByBarcode(userId);
+        const product = await getProductByBarcode(barcode);
         if (!product) {
             return res.status(404).send({ message: 'Product not found' });
         }
@@ -82,15 +82,15 @@ router.get('/scan', async (req, res) => {
 //     }
 // });
 router.get('/', async (req, res) => {
-  const { userId } = req.query; // Extract barcode from query parameters
+  const { barcode } = req.query; // Extract barcode from query parameters
 
-  if (!userId) {
+  if (!barcode) {
     return res.status(400).json({ message: 'Invalid request. Barcode query parameter is required. Use the format ?barcode=<value>' });
   }
 
   try {
     // Find product by barcode
-    const product = await Product.findOne({ userId });
+    const product = await Product.findOne({ barcode });
 
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
@@ -104,10 +104,10 @@ router.get('/', async (req, res) => {
 
 
 // PATCH /api/productts/decrement/:barcode - Decrement product quantity by 1
-router.patch('/decrement/:id', async (req, res) => {
-    const { userId } = req.params;
+router.patch('/decrement/:barcode', async (req, res) => {
+    const { barcode } = req.params;
     try {
-        const product = await Product.findOne({ userId });
+        const product = await Product.findOne({ barcode });
         if (product && product.productQuantity > 0) {
             product.productQuantity -= 1;
             await product.save();
