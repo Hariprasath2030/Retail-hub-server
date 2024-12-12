@@ -6,7 +6,7 @@ const router = express.Router();
 
 // POST /scan - Reduce product quantity by 1 after scanning
 router.post('/scan', async (req, res) => {
-    const { userId } = req.body; // Assuming barcode as the identifier
+    const { userId } = req.body;
     try {
         const product = await getProductByBarcode(userId);
         if (!product) {
@@ -23,14 +23,8 @@ router.post('/scan', async (req, res) => {
         res.status(500).send({ message: err.message });
     }
 });
-
-// POST / - Add or update a product
 router.post('/', async (req, res) => {
   const { userId, productName, price, productQuantity } = req.body;
-
-  if (!userId || !productName || !price || !productQuantity) {
-    return res.status(400).json({ message: 'Missing required product details' });
-  }
 
   try {
     const existingProduct = await Product.findOne({ userId });
@@ -53,13 +47,10 @@ router.post('/', async (req, res) => {
   }
 });
 
+
 // GET /scan - Retrieve product details by barcode
 router.get('/scan', async (req, res) => {
-    const userId = req.query.barcode; // Use barcode in query
-    if (!userId) {
-        return res.status(400).json({ message: 'Barcode is required' });
-    }
-
+    const userId = req.query.userId;
     try {
         const product = await getProductByBarcode(userId);
         if (!product) {
@@ -76,12 +67,25 @@ router.get('/scan', async (req, res) => {
     }
 });
 
-// GET / - Fetch product by barcode
+// GET /api/productts/:barcode - Fetch product by barcode
+// router.get('/', async (req, res) => {
+//     const { barcode } = req.params;
+//     try {
+//         const product = await Product.findOne({ barcode });
+//         if (product) {
+//             res.json(product);
+//         } else {
+//             res.status(404).json({ message: 'Product not found' });
+//         }
+//     } catch (error) {
+//         res.status(500).json({ message: 'Error retrieving product', error });
+//     }
+// });
 router.get('/', async (req, res) => {
   const { userId } = req.query; // Extract barcode from query parameters
 
   if (!userId) {
-    return res.status(400).json({ message: 'Barcode query parameter is required' });
+    return res.status(400).json({ message: 'Invalid request. Barcode query parameter is required. Use the format ?barcode=<value>' });
   }
 
   try {
@@ -98,28 +102,22 @@ router.get('/', async (req, res) => {
   }
 });
 
-// PATCH /api/products/decrement/:barcode - Decrement product quantity
-router.patch('/api/productts/decrement/:userId', async (req, res) => {
-  const { userId } = req.params;
-  const { quantity } = req.query; // Quantity to decrement passed as query parameter
 
-  if (!quantity || isNaN(quantity) || parseInt(quantity, 10) <= 0) {
-    return res.status(400).json({ message: 'Invalid quantity value' });
-  }
-
-  try {
-    const product = await Product.findOne({ userId });
-    if (product && product.productQuantity >= quantity) {
-      product.productQuantity -= parseInt(quantity, 10);
-      await product.save();
-      return res.status(200).json({ message: 'Quantity decremented successfully' });
-    } else {
-      return res.status(400).json({ message: 'Not enough stock to decrement' });
+// PATCH /api/productts/decrement/:barcode - Decrement product quantity by 1
+router.patch('/decrement/:userId', async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const product = await Product.findOne({ userId });
+        if (product && product.productQuantity > 0) {
+            product.productQuantity -= 1;
+            await product.save();
+            res.status(200).json(product);
+        } else {
+            res.status(400).json({ message: 'Product is out of stock or not found.' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating product', error });
     }
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error' });
-  }
 });
 
 module.exports = router;
