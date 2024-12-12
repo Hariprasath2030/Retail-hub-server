@@ -1,6 +1,6 @@
 const express = require('express');
 const { getProductByBarcode, updateProductQuantity } = require('../controllers/BarProductController');
-const Product = require('../models/BarProduct');
+const Product = require('../models/Product');
 
 const router = express.Router();
 
@@ -14,31 +14,31 @@ router.post('/scan', async (req, res) => {
         }
         const updatedProduct = await updateProductQuantity(barcode, 1); // Reduce quantity by 1
         res.status(200).json({
-            name: updatedProduct.name,
-            quantity: updatedProduct.quantity,
-            price: updatedProduct.price,
-            totalPrice: updatedProduct.price * updatedProduct.quantity,
+          productName: updatedProduct.productName,
+          productQuantity: updatedProduct.productQuantity,
+          price: updatedProduct.price,
+          totalPrice: updatedProduct.price * updatedProduct.productQuantity,
         });
     } catch (err) {
         res.status(500).send({ message: err.message });
     }
 });
 router.post('/', async (req, res) => {
-  const { barcode, name, price, quantity } = req.body;
+  const { barcode, productName, price, productQuantity } = req.body;
 
   try {
     const existingProduct = await Product.findOne({ barcode });
 
     if (existingProduct) {
       // Update quantity if the product already exists
-      existingProduct.quantity += quantity;
+      existingProduct.productQuantity += productQuantity;
       await existingProduct.save();
 
       return res.status(200).json({ message: 'Product quantity updated', product: existingProduct });
     }
 
     // Create a new product if it doesn't exist
-    const newProduct = new Product({ barcode, name, price, quantity });
+    const newProduct = new Product({ barcode, productName, price, productQuantity });
     await newProduct.save();
 
     res.status(201).json({ message: 'Product added successfully', product: newProduct });
@@ -57,10 +57,10 @@ router.get('/scan', async (req, res) => {
             return res.status(404).send({ message: 'Product not found' });
         }
         res.status(200).json({
-            name: product.name,
+            productName: product.productName,
             price: product.price,
-            quantity: product.quantity,
-            totalPrice: product.price * product.quantity,
+            productQuantity: product.productQuantity,
+            totalPrice: product.price * product.productQuantity,
         });
     } catch (err) {
         res.status(500).send({ message: err.message });
@@ -108,8 +108,8 @@ router.patch('/decrement/:barcode', async (req, res) => {
     const { barcode } = req.params;
     try {
         const product = await Product.findOne({ barcode });
-        if (product && product.quantity > 0) {
-            product.quantity -= 1;
+        if (product && product.productQuantity > 0) {
+            product.productQuantity -= 1;
             await product.save();
             res.status(200).json(product);
         } else {

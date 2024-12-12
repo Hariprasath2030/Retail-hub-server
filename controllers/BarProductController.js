@@ -1,4 +1,4 @@
-const Product = require('../models/BarProduct');
+const Product = require('../models/Product');
 
 const getProductByBarcode = async (barcode) => {
   try {
@@ -9,11 +9,11 @@ const getProductByBarcode = async (barcode) => {
   }
 };
 
-const updateProductQuantity = async (barcode, quantity) => {
+const updateProductQuantity = async (barcode, productQuantity) => {
   try {
     const product = await Product.findOne({ barcode });
-    if (product && product.quantity > 0) {
-      product.quantity -= quantity;
+    if (product && product.productQuantity > 0) {
+      product.productQuantity -= productQuantity;
       await product.save();
       return product;
     }

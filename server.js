@@ -23,7 +23,7 @@ app.use(express.json());
 app.use('/api/auth', authRoute);
 app.use('/api/products', productRoutes);
 app.use('/api/customer',customerRoutes);
-app.use('/api/productts',barProductRoutes); // Use product routes
+app.use('/api/products',barProductRoutes); // Use product routes
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })

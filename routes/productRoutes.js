@@ -4,8 +4,8 @@ const router = express.Router();
 
 // Utility function for validating product input
 const validateProductInput = (data) => {
-  const { userId, productName, productQuantity, price } = data;
-  if (!userId || !productName || productQuantity < 0 || price < 0) {
+  const { barcode, productName, productQuantity, price } = data;
+  if (!barcode || !productName || productQuantity < 0 || price < 0) {
     return false; // Validation failed
   }
   return true; // Validation succeeded
@@ -27,8 +27,8 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ message: 'Invalid input' });
   }
 
-  const { userId, productName, productQuantity, price } = req.body;
-  const newProduct = new Product({ userId, productName, productQuantity, price });
+  const { barcode, productName, productQuantity, price } = req.body;
+  const newProduct = new Product({ barcode, productName, productQuantity, price });
 
   try {
     const savedProduct = await newProduct.save();
