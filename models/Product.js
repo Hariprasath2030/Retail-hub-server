@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 // Define the product schema
 const productSchema = new mongoose.Schema({
-  barcodeId: { 
+  userId: { 
     type: String,
     required: [true, 'Product ID is required'],
     unique: true
