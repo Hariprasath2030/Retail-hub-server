@@ -5,10 +5,16 @@ const router = express.Router();
 // Utility function for validating product input
 const validateProductInput = (data) => {
   const { userId, productName, productQuantity, price } = data;
-  if (!userId || !productName || productQuantity < 0 || price < 0) {
-    return false; // Validation failed
+  if (!userId || !productName) {
+    return { isValid: false, message: 'User ID and Product Name are required.' };
   }
-  return true; // Validation succeeded
+  if (typeof productQuantity !== 'number' || productQuantity < 0) {
+    return { isValid: false, message: 'Product Quantity must be a non-negative number.' };
+  }
+  if (typeof price !== 'number' || price < 0) {
+    return { isValid: false, message: 'Price must be a non-negative number.' };
+  }
+  return { isValid: true };
 };
 
 // Get all products
@@ -23,8 +29,9 @@ router.get('/', async (req, res) => {
 
 // Add a new product
 router.post('/', async (req, res) => {
-  if (!validateProductInput(req.body)) {
-    return res.status(400).json({ message: 'Invalid input' });
+  const validation = validateProductInput(req.body);
+  if (!validation.isValid) {
+    return res.status(400).json({ message: validation.message });
   }
 
   const { userId, productName, productQuantity, price, description, image } = req.body;
@@ -41,11 +48,12 @@ router.post('/', async (req, res) => {
 // Update a product by ID
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
-  const { productName, productQuantity, price, description, image } = req.body;
-
-  if (!productName || typeof productQuantity !== 'number' || typeof price !== 'number') {
-    return res.status(400).json({ message: 'Invalid input' });
+  const validation = validateProductInput(req.body);
+  if (!validation.isValid) {
+    return res.status(400).json({ message: validation.message });
   }
+
+  const { productName, productQuantity, price, description, image } = req.body;
 
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
