@@ -27,8 +27,8 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ message: 'Invalid input' });
   }
 
-  const { userId, productName, productQuantity, price, description, image } = req.body;
-  const newProduct = new Product({ userId, productName, productQuantity, price, description, image });
+  const { userId, productName, productQuantity, price } = req.body;
+  const newProduct = new Product({ userId, productName, productQuantity, price });
 
   try {
     const savedProduct = await newProduct.save();
@@ -37,31 +37,26 @@ router.post('/', async (req, res) => {
     res.status(400).json({ message: `Error saving product: ${err.message}` });
   }
 });
+
+// Update a product by ID
 router.put('/:id', async (req, res) => {
-  console.log("Received payload:", req.body);
-  console.log("Product ID:", req.params.id);
-
-  const { productName, productQuantity, price, description, image } = req.body;
-
-  if (!productName || typeof productQuantity !== 'number' || typeof price !== 'number') {
-    return res.status(400).json({ message: 'Invalid input' });
+  const { id } = req.params;
+  const { productName, productQuantity } = req.body;
+  if (!productName || typeof productQuantity !== 'number') {
+    return res.status(400).send('Invalid data');
   }
-
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
-      { productName, productQuantity, price, description, image },
+      id,
+      { productName, productQuantity },
       { new: true, runValidators: true }
     );
-
     if (!updatedProduct) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).send('Product not found');
     }
-
     res.json(updatedProduct);
   } catch (error) {
-    console.error("Error updating product:", error.message);
-    res.status(500).json({ message: `Error updating product: ${error.message}` });
+    res.status(500).send('Server error');
   }
 });
 
