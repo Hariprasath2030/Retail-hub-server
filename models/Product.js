@@ -22,6 +22,14 @@ const productSchema = new mongoose.Schema({
     required: [true, 'Price is required'], 
     min: [0, 'Price must be a positive number'] 
   },
+  description: { 
+    type: String, 
+    default: '' // New Field: Default empty string
+  },
+  image: { 
+    type: String, 
+    default: '' // New Field: Default empty string for image URL
+  }
 });
 
 // Export the Product model
