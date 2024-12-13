@@ -5,16 +5,10 @@ const router = express.Router();
 // Utility function for validating product input
 const validateProductInput = (data) => {
   const { userId, productName, productQuantity, price } = data;
-  if (!userId || !productName) {
-    return { isValid: false, message: 'User ID and Product Name are required.' };
+  if (!userId || !productName || productQuantity < 0 || price < 0) {
+    return false; // Validation failed
   }
-  if (typeof productQuantity !== 'number' || productQuantity < 0) {
-    return { isValid: false, message: 'Product Quantity must be a non-negative number.' };
-  }
-  if (typeof price !== 'number' || price < 0) {
-    return { isValid: false, message: 'Price must be a non-negative number.' };
-  }
-  return { isValid: true };
+  return true; // Validation succeeded
 };
 
 // Get all products
@@ -29,9 +23,8 @@ router.get('/', async (req, res) => {
 
 // Add a new product
 router.post('/', async (req, res) => {
-  const validation = validateProductInput(req.body);
-  if (!validation.isValid) {
-    return res.status(400).json({ message: validation.message });
+  if (!validateProductInput(req.body)) {
+    return res.status(400).json({ message: 'Invalid input' });
   }
 
   const { userId, productName, productQuantity, price, description, image } = req.body;
@@ -44,20 +37,19 @@ router.post('/', async (req, res) => {
     res.status(400).json({ message: `Error saving product: ${err.message}` });
   }
 });
-
-// Update a product by ID
 router.put('/:id', async (req, res) => {
-  const { id } = req.params;
-  const validation = validateProductInput(req.body);
-  if (!validation.isValid) {
-    return res.status(400).json({ message: validation.message });
-  }
+  console.log("Received payload:", req.body);
+  console.log("Product ID:", req.params.id);
 
   const { productName, productQuantity, price, description, image } = req.body;
 
+  if (!productName || typeof productQuantity !== 'number' || typeof price !== 'number') {
+    return res.status(400).json({ message: 'Invalid input' });
+  }
+
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
-      id,
+      req.params.id,
       { productName, productQuantity, price, description, image },
       { new: true, runValidators: true }
     );
@@ -68,6 +60,7 @@ router.put('/:id', async (req, res) => {
 
     res.json(updatedProduct);
   } catch (error) {
+    console.error("Error updating product:", error.message);
     res.status(500).json({ message: `Error updating product: ${error.message}` });
   }
 });
